@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.vite/
+test-results/
+playwright-report/
+*.tsbuildinfo
+certs/
+
+# Generated intact from the pinned, licensed SDK during build.
+/public/vendor/xr8/*
+!/public/vendor/xr8/README.md

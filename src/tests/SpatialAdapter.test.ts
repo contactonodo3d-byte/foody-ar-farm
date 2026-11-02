@@ -1,0 +1,9 @@
+import {describe,it,expect} from 'vitest';
+import {SpatialAdapter} from '../ar/SpatialAdapter';
+import {GameEngine} from '../engine/GameEngine';
+describe('real spatial tracking gate',()=>{
+ it('requires placement and three consecutive non-emulated valid poses',()=>{const a=new SpatialAdapter();a.updateTracking({x:0,y:1,z:0});expect(a.reliablePhysicalTracking).toBe(false);a.place({x:10,y:-1,z:20});for(let i=0;i<3;i++)a.updateTracking({x:11.4,y:.6,z:20.2});expect(a.reliablePhysicalTracking).toBe(true);expect(a.getPosition().x).toBeCloseTo(1.4);expect(a.getPosition().z).toBeCloseTo(.2);a.updateTracking(null);expect(a.reliablePhysicalTracking).toBe(false);a.updateTracking({x:11,y:1,z:20},true);expect(a.reliablePhysicalTracking).toBe(false);});
+ it('pauses time and food on lost tracking or outside, resumes only with valid in-area poses',()=>{const a=new SpatialAdapter(),g=new GameEngine(a);g.start();g.update(1);expect(g.remaining).toBe(60);a.place({x:0,y:0,z:0});for(let i=0;i<3;i++)a.updateTracking({x:0,y:1.6,z:0});g.update(1);expect(g.remaining).toBe(59);for(let i=0;i<3;i++)a.updateTracking({x:2,y:1.6,z:0});g.update(1);expect(g.remaining).toBe(59);expect(g.getBoundary().shouldPause).toBe(true);expect(g.placeFood({x:0,z:0})).not.toBeNull();a.updateTracking(null);g.update(1);expect(g.remaining).toBe(59);for(let i=0;i<3;i++)a.updateTracking({x:0,y:1.6,z:0});g.update(1);expect(g.remaining).toBe(58);});
+ it('rejects an invalid spatial origin',()=>{const a=new SpatialAdapter();a.place({x:NaN,y:0,z:0});for(let i=0;i<3;i++)a.updateTracking({x:0,y:1,z:0});expect(a.origin).toBeNull();expect(a.reliablePhysicalTracking).toBe(false);});
+ it('invalidates placement after a reference reset',()=>{const a=new SpatialAdapter();a.place({x:1,y:0,z:1});for(let i=0;i<3;i++)a.updateTracking({x:1,y:1.6,z:1});a.resetPlacement();expect(a.origin).toBeNull();expect(a.reliablePhysicalTracking).toBe(false);expect(a.getPauseReason()).toContain('colocar');});
+});

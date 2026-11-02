@@ -1,0 +1,24 @@
+import { test,expect } from '@playwright/test';
+test('play, feed, pause, finish and restart a round',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.clock.install();
+ await page.goto('/');await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();
+ await expect(page.getByTestId('timer')).toBeVisible();
+ await page.getByRole('button',{name:'Servir en el explorador'}).click();
+ await expect(page.getByTestId('score')).not.toHaveText('0',{timeout:20000});
+ await page.screenshot({path:'test-results/playing-mobile.png',fullPage:true});
+ await page.getByRole('button',{name:'Pausar granja',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Servir en el explorador'})).toBeDisabled();
+ const frozen=await page.getByTestId('timer').innerText();await page.clock.runFor(1200);await expect(page.getByTestId('timer')).toHaveText(frozen);
+ await page.getByRole('button',{name:'Reanudar granja'}).click();
+ await page.clock.fastForward(61000);await page.clock.runFor(300);
+ await expect(page.getByRole('heading',{name:'¡Una granja llena de felicidad!'})).toBeVisible();
+ await expect(page.getByRole('link',{name:'Guardar imagen'})).toBeVisible();
+ const image=page.locator('.share-card img');await expect(image).toBeVisible();
+ expect(await image.evaluate((el:HTMLImageElement)=>[el.naturalWidth,el.naturalHeight])).toEqual([1080,1920]);
+ const download=page.waitForEvent('download');await page.getByRole('link',{name:'Guardar imagen'}).click();const file=await download;expect(file.suggestedFilename()).toBe('mi-granja-foody.png');await file.saveAs('test-results/foody-story.png');
+ await page.screenshot({path:'test-results/results.png',fullPage:true});
+ await page.getByRole('button',{name:'Volver a jugar'}).click();await page.clock.runFor(200);
+ await expect(page.getByTestId('score')).toHaveText('0');await expect(page.getByTestId('timer')).toHaveText('60s');
+ expect(errors).toEqual([]);
+});
