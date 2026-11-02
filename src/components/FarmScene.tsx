@@ -6,6 +6,7 @@ import type { MarkerPose } from '../hooks/useMarkerTracking';
 import { SpatialSession, type SpatialControls, type SpatialStatus } from '../ar/SpatialSession';
 import type { RefObject } from 'react';
 import { FoodEffects } from './FoodEffects';
+import { ThrowControl } from './ThrowControl';
 import { Animals } from './Animals';
 import type { GameEngine } from '../engine/GameEngine';
 import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
@@ -66,11 +67,11 @@ function ToyBarn(){return <group position={[-0.85,0,-0.85]}>
  <mesh position={[0,.17,.246]}><boxGeometry args={[.19,.34,.01]}/><meshStandardMaterial color="#754a39"/></mesh>
  <mesh position={[0,.2,.26]}><boxGeometry args={[.018,.3,.01]}/><meshStandardMaterial color="#fff3d4"/></mesh>
  </group>}
-function Scene({onPlacementChange,editing,position,state,onMove,paused,engine,reduced,cameraOverlay,marker,markerPose,world,worldAdapter,spatial,spatialControls,onSpatialStatus}:{onPlacementChange:()=>void;editing:boolean;world:boolean;worldAdapter:WorldTrackingAdapter;marker:boolean;markerPose:RefObject<MarkerPose|null>;spatial:boolean;spatialControls:RefObject<SpatialControls|null>;onSpatialStatus:(status:SpatialStatus)=>void;cameraOverlay:boolean;reduced:boolean;engine:GameEngine;position:Position;state:BoundaryState;onMove:(p:Position)=>void;paused:boolean}){
+function Scene({onPlacementChange,editing,position,state,onMove,onThrowNotice,paused,engine,reduced,cameraOverlay,marker,markerPose,world,worldAdapter,spatial,spatialControls,onSpatialStatus}:{onPlacementChange:()=>void;editing:boolean;world:boolean;worldAdapter:WorldTrackingAdapter;marker:boolean;markerPose:RefObject<MarkerPose|null>;spatial:boolean;spatialControls:RefObject<SpatialControls|null>;onSpatialStatus:(status:SpatialStatus)=>void;cameraOverlay:boolean;reduced:boolean;engine:GameEngine;position:Position;state:BoundaryState;onMove:(p:Position)=>void;onThrowNotice:(message:string)=>void;paused:boolean}){
  const farm=useRef<THREE.Group>(null);
  const transparent=cameraOverlay||spatial||world;
- const click=(e:ThreeEvent<PointerEvent>)=>{if(spatial)return;e.stopPropagation();if(e.delta<8)onMove(farm.current?farm.current.worldToLocal(e.point.clone()):{x:e.point.x,z:e.point.z});};
- return <>{!transparent&&<color attach="background" args={['#dff3ff']}/>}<ambientLight intensity={1.8}/><directionalLight position={[3,6,4]} intensity={2.4} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-4} shadow-camera-right={4} shadow-camera-top={4} shadow-camera-bottom={-4}/>
+ const click=(e:ThreeEvent<PointerEvent>)=>{if(spatial||engine.phase==='playing')return;e.stopPropagation();if(e.delta<8)onMove(farm.current?farm.current.worldToLocal(e.point.clone()):{x:e.point.x,z:e.point.z});};
+ return <>{!transparent&&<color attach="background" args={['#dff3ff']}/>}<ambientLight intensity={1.25}/><directionalLight position={[3,6,4]} intensity={1.85} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-4} shadow-camera-right={4} shadow-camera-top={4} shadow-camera-bottom={-4}/>
  <SpatialSession engine={engine} farm={farm} controls={spatialControls} onStatus={onSpatialStatus}/>
  <PlacementGestures adapter={worldAdapter} enabled={world&&editing} onChange={onPlacementChange}/>
  <WorldTrackingScene active={world} adapter={worldAdapter} farm={farm}/>
@@ -83,8 +84,9 @@ function Scene({onPlacementChange,editing,position,state,onMove,paused,engine,re
  {Array.from({length:16},(_,i)=><mesh key={i} position={[Math.sin(i*27)*1.25,.025,Math.cos(i*17)*1.25]} rotation={[-Math.PI/2,0,0]}><circleGeometry args={[.018,5]}/><meshBasicMaterial color={i%3?'#f6f8b6':'#fffef4'}/></mesh>)}
  <mesh position={[position.x,.035,position.z]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.09,.14,32]}/><meshBasicMaterial color="#244e49" side={THREE.DoubleSide}/></mesh>
  <mesh position={[position.x,.13,position.z]} castShadow><sphereGeometry args={[.075,16,12]}/><meshStandardMaterial color="#fff9e8"/></mesh>
- <Animals engine={engine} paused={paused||reduced}/><FoodEffects engine={engine} reduced={reduced}/><Walls position={position} paused={paused||reduced}/>
+ <ThrowControl farm={farm} engine={engine} enabled={engine.phase==='playing'&&!paused} onNotice={onThrowNotice}/>
+ <Animals engine={engine} paused={paused} reduced={reduced}/><FoodEffects engine={engine} reduced={reduced}/><Walls position={position} paused={paused||reduced}/>
  </group></>;
 }
 class SceneError extends Component<{children:ReactNode},{failed:boolean}>{state={failed:false};static getDerivedStateFromError(){return {failed:true}}render(){return this.state.failed?<p className="scene-error" role="alert">No se pudo abrir la vista 3D. Activá WebGL y recargá la página. Los controles virtuales siguen disponibles.</p>:this.props.children}}
-export function FarmScene(props:Omit<Parameters<typeof Scene>[0], 'reduced'>){const reduced=useReducedMotion();return <SceneError><Suspense fallback={<p>Cargando granja…</p>}><Canvas shadows dpr={[1,1.5]} camera={{position:[3.5,4.4,4.8],fov:43}} gl={{alpha:true,antialias:true,powerPreference:'low-power'}} onCreated={({camera})=>camera.lookAt(0,0,0)}><Scene {...props} reduced={reduced}/></Canvas></Suspense></SceneError>}
+export function FarmScene(props:Omit<Parameters<typeof Scene>[0], 'reduced'>){const reduced=useReducedMotion();return <SceneError><Suspense fallback={<p>Cargando granja…</p>}><Canvas shadows dpr={[1,1.5]} camera={{position:[2.45,3.25,2.75],fov:40}} gl={{alpha:true,antialias:true,powerPreference:'low-power'}} onCreated={({camera,gl})=>{camera.lookAt(0,.12,0);gl.domElement.dataset.engine='three';}}><Scene {...props} reduced={reduced}/></Canvas></Suspense></SceneError>}
