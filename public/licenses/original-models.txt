@@ -1,0 +1,17 @@
+Foody AR Farm — original stylized animals and feed art
+Copyright 2026 Fabrizzio Ruiz. All rights reserved by the project owner.
+
+The chicken, chick and rabbit rigs in public/models/*.glb and the feed
+illustrations in public/branding/feed-*.svg and foody-mark.svg were drawn
+for this Expo Vet demo. They are not third-party downloads.
+
+Quaternius and Kenney publish CC0 animals, but a chicken + chick + rabbit
+set with idle/walk/eat clips could not be fetched reliably while preparing
+this build (the published farm packs on hand do not include that trio, and
+the Poly Pizza files were behind a bot check). These original low-poly rigs
+replace the earlier sphere placeholders. Swap any of them by replacing the
+GLB at the same path; the game looks for Body, Torso, Head, WingL, WingR,
+LegL, LegR and, on the rabbit, EarL and EarR.
+
+The Foody wordmark and colors here are stand-in art until the official
+brand kit is dropped in. See README.md, “Swap the brand”.

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="Mix mini Foody">
+  <rect x="16" y="14" width="48" height="52" rx="10" fill="#fffdf2" stroke="#efce71" stroke-width="4"/>
+  <rect x="16" y="14" width="48" height="16" rx="8" fill="#efce71"/>
+  <text x="40" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#6a4a12">FOODY</text>
+  <circle cx="32" cy="44" r="4" fill="#f4bd47"/><circle cx="44" cy="42" r="3.5" fill="#e07a2f"/><circle cx="40" cy="52" r="4" fill="#75ab5b"/>
+  <text x="40" y="66" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#6a4a12">MIX MINI</text>
+</svg>

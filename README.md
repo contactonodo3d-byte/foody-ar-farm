@@ -1,6 +1,24 @@
 # Foody AR Farm
 
-Local mobile-first expo game. Source remains on this Mac. No repository was created, no code pushed, and nothing deployed.
+Mobile-first expo game for the Foody stand at Expo Vet 2026 (Asunción). Virtual mode needs no camera. Camera and markerless AR need the public HTTPS URL below.
+
+## Public link tonight
+
+The GitHub Pages address is **https://contactonodo3d-byte.github.io/foody-ar-farm/**
+
+After this pull request is merged into `main`:
+
+1. Open the repository on GitHub → **Settings** → **Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Open the **Actions** tab. The workflow **Deploy GitHub Pages** starts on the merge. If it does not, open that workflow and choose **Run workflow**.
+4. When the job is green, open the URL above on the phone (Safari or Chrome). Accept the camera only from the “Activar cámara” or “Probar AR” buttons.
+5. On the stand tablet, open the same URL with `?stand=1` for the QR poster. The QR reads `VITE_PUBLIC_URL`, which the workflow sets to that Pages URL.
+
+`npm run build` runs `prebuild`, which runs `npm run sync:xr8` and copies the pinned `@8thwall/engine-binary` into `public/vendor/xr8` before Vite runs. The Pages workflow installs with `npm ci`, so that sync works in CI. The engine loads `xr-slam.js` relative to the script URL, so the `/foody-ar-farm/` base path stays on the same origin.
+
+**Vercel (alternative, often faster):** [vercel.com/new](https://vercel.com/new) → import this repo → Framework **Vite** → leave `FOODY_BASE_PATH` empty (the site is the domain root) → Deploy. Then set `VITE_PUBLIC_URL` to the Vercel URL and redeploy so the QR matches. `vercel.json` is already in the repo.
+
+**Netlify:** Add site → import the repo → build `npm run build`, publish `dist`. `netlify.toml` is included. Set `VITE_PUBLIC_URL` the same way if the QR should point at Netlify instead of Pages.
 
 ## Preview
 
@@ -25,8 +43,8 @@ The SSL plugin generates a self-signed development certificate. A Safari excepti
 ## Play
 
 1. Tap “¡A jugar!” for a 60-second round.
-2. Select Maíz for chickens, Mix mini for chicks, or Verdecitos for rabbits. These are placeholder products.
-3. Tap inside the field. A matching animal approaches, eats, celebrates and awards points. The “Servir en el explorador” button and arrow controls provide a keyboard/tap alternative.
+2. Select Maíz for chickens, Mix mini for chicks, or Verdecitos for rabbits. Art and names live in `src/config/BrandConfig.ts`.
+3. Press and hold on the field (a bag or bowl, a charge ring and a dotted arc), then swipe and release to throw. The morsel flies with gravity, bounces inside the 3×3 field and never leaves it. Animals react to where it settles. “Servir en el explorador” and the arrow keys remain the accessible fallback. In immersive WebXR, a tap on the surface still serves along the ray.
 4. Consecutive meals within five seconds increase the combo. Every three additional meals raises the multiplier, up to ×4. Each meal starts at 100 points.
 5. Pause whenever needed. Switching away from the page pauses virtual gameplay time. Camera tracks stop when the page is hidden; reopen the camera explicitly on return.
 6. Results generate an original 1080 × 1920 PNG. Use native file sharing when available or save the image. Canceling native sharing does not force a download.
@@ -36,7 +54,7 @@ Sound is optional, synthesized locally with Web Audio, and enabled only by a use
 ## Milestones
 
 - **M0/M1:** React/TypeScript/Vite/R3F scene; metric square; ground taps and directional controls; permanent four-side outline; debug sliders/presets. Triggered wall has full intensity; remaining walls use 25% context intensity. Corner walls can both be emphasized.
-- **M2:** Seven procedural low-poly animals: two chickens, three chicks, two rabbits. Deterministic state-machine movement, pecking, chick following, hopping, separation and barn/edge avoidance. Original procedural models are provisional, with no remote model requests or model licensing dependency. GLB/GLTF asset replacement remains future production polish.
+- **M2:** Seven animals: two chickens, three chicks, two rabbits. Deterministic state-machine movement, pecking, chick following, hopping, separation and barn/edge avoidance. The live rigs are original stylized models (also exported to `public/models/*.glb`) posed by that state machine: walk cycle, peck/eat anticipation, happy squash. See `public/licenses/original-models.txt`. CC0 Quaternius/Kenney downloads were not used; the packs that could be fetched do not include this chicken/chick/rabbit trio.
 - **M3:** Three configured feeds, food placement with capacity/cooldown, species matching, approach/eat/happy reactions, score/combo/multipliers, 60-second rounds, pause and replay.
 - **M4:** Friendly Spanish UI, onboarding, floating hearts, optional synthesized sound, results, original vertical card and Web Share/download fallback. Foody wordmark/colors are provisional pending official assets.
 - **M5:** Camera overlay with permission/secure-context handling, track cleanup and fallback. Experimental WebXR immersive-ar session and hit testing behind actual capability detection; no requirement for virtual or camera mode.
@@ -64,7 +82,8 @@ Reference APIs: [Three.js WebXRManager](https://threejs.org/docs/pages/WebXRMana
 - `src/engine/AnimalAI.ts`: deterministic animal state machines and movement independent of React/Three.js.
 - `src/engine/FeedingSystem.ts`, `ScoreSystem.ts`, `BoundarySystem.ts`: gameplay systems.
 - `src/ar/`: interchangeable adapter contract, VirtualAdapter, CameraOverlayAdapter, SpatialAdapter and XR renderer bridge.
-- `src/config/BrandConfig.ts`: brand, placeholder products and metric configuration.
+- `src/config/BrandConfig.ts`: brand, feeds, social handles, studio credit and metric configuration.
+- `src/engine/ThrowPhysics.ts`: toss, bounce and field clamp. `public/models/`: chicken, chick and rabbit GLB rigs.
 - `src/hooks/`: game loop, sound, camera lifecycle and motion preferences.
 - `src/styles/main.css`: responsive layout, safe areas, focus states, reduced motion and spatial overlay layout.
 - `public/models/`, `public/audio/`, `public/branding/`: locations reserved for production assets.
@@ -86,7 +105,26 @@ Camera stream and native share tests are simulated. No physical iPhone, physical
 
 Mobile accessibility review: named controls, focus rings, keyboard alternatives, pause, status messages, safe-area spacing, reduced-motion behavior and transparent tracking labels. Reference: https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
 
-Production build remains dominated by Three.js (about 321 KB gzip for JS). Test real-device frame rate, load time and heat before expo use. Official Foody assets/catalog, optimized GLBs and device validation remain production work.
+Production build remains dominated by Three.js. Test real-device frame rate, load time and heat on the stand phone. The animal GLBs are a few kilobytes each (no Draco). Official Foody logo files can replace the stand-in art without code changes beyond `BrandConfig`.
+
+## Swap the brand
+
+Edit only `src/config/BrandConfig.ts`, then replace files under `public/branding/` if you want new pixels.
+
+- `colors` and `accent` recolor the UI. Feed `color` / `accent` recolor the 3D bag or bowl and its label. The label text is `bagLabel`.
+- `logo` and each food `iconSrc` are paths under `public/`. Drop a sponsor SVG or PNG on the same path, or point the field at a new file. Buttons and the stand QR page pick them up. No remote fetch.
+- Social handles are config: `instagram`, `facebook` and `tiktok` are `@foody`; `parent` is `@Agroalimentos_SA`; hashtags are `#FoodyARFarm` and `#ExpoVet2026`. The story hint is the string `storyHint` (`Etiquetá a @foody en tu historia`). The share image prints `@foody` plus the hashtags. The share caption adds a second line with `@Agroalimentos_SA`. These handles came from the owner and should be double-checked on Instagram before the stand opens.
+- Studio credit (`studio`) is the Fabrizzio Ruiz line, site and WhatsApp deep link on the start screen, the results screen and the QR poster.
+- `VITE_PUBLIC_URL` overrides the QR target. The default is the GitHub Pages URL.
+
+Results sharing uses the Web Share API with the PNG and the caption when the browser allows both. If it rejects the combination, the sheet gets the image alone. **Copiar texto** and the selectable caption are the fallback, plus **Guardar imagen**. Instagram cannot be prefilled by URL; the hint tells the visitor to tag `@foody` in the story.
+
+## Follow-ups before calling it finished on a real device
+
+- Confirm `@foody` and `@Agroalimentos_SA` on Instagram the morning of the fair.
+- Walk the HTTPS URL on an iPhone: camera permission, marker, markerless placement, a few throws, the share sheet.
+- Drop official Foody logo and feed art into `public/branding/` when the brand kit arrives.
+- Calibrated 3×3 m boundaries are still not claimed. Do not enable metric OUTSIDE pausing until a real floor measurement exists.
 
 ## Optional local tracking experiment and diagnostics
 

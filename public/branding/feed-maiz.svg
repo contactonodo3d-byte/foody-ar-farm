@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="Maíz Foody">
+  <rect x="18" y="10" width="44" height="60" rx="8" fill="#f4bd47"/>
+  <rect x="18" y="10" width="44" height="16" rx="8" fill="#ec5938"/>
+  <rect x="18" y="18" width="44" height="8" fill="#ec5938"/>
+  <text x="40" y="21" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#fffdf2">FOODY</text>
+  <g fill="#fff4c8">
+    <ellipse cx="32" cy="40" rx="4" ry="6"/><ellipse cx="40" cy="40" rx="4" ry="6"/><ellipse cx="48" cy="40" rx="4" ry="6"/>
+    <ellipse cx="36" cy="52" rx="4" ry="6"/><ellipse cx="44" cy="52" rx="4" ry="6"/>
+  </g>
+  <text x="40" y="66" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#6a3b12">MAÍZ</text>
+</svg>
