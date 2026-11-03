@@ -2,7 +2,7 @@ import { test,expect } from '@playwright/test';
 test('play, feed, pause, finish and restart a round',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install();
- await page.goto('/');await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();
+ await page.goto('/');await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();
  await expect(page.getByTestId('timer')).toBeVisible();
  await page.getByRole('button',{name:'Servir en el explorador'}).click();
  await expect(page.getByTestId('score')).not.toHaveText('0',{timeout:20000});

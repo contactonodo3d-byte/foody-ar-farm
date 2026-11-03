@@ -61,7 +61,20 @@ export function App() {
   setMessage(engine.placeFood(displayPosition) ?? '¡Alimento servido! Mirá quién se acerca.');
  }, [displayPosition, engine, paused]);
  const step = useCallback((x: number, z: number) => setPosition(p => ({ x: Math.max(-2, Math.min(2, p.x + x)), z: Math.max(-2, Math.min(2, p.z + z)) })), []);
- const start = () => { engine.start(); setPaused(false); setEditing(false); setRevision(value => value + 1); setMessage('Elegí alimento, mantené el campo y deslizá para tirar.'); };
+ const [nick,setNick] = useState('');
+ const roundNick = useRef('');
+ const nickInput = useRef<HTMLInputElement>(null);
+ const start = () => {
+  const name = nick.trim();
+  if (!name) {
+   nickInput.current?.focus();
+   nickInput.current?.setCustomValidity('Escribí tu nick para jugar.');
+   nickInput.current?.reportValidity();
+   return;
+  }
+  roundNick.current = name;
+  nickInput.current?.blur();
+  engine.start(); setPaused(false); setEditing(false); setRevision(value => value + 1); setMessage('Elegí alimento, mantené el campo y deslizá para tirar.'); };
  const launchCamera = () => { if (world.active) void world.stop(); else if (camera.active) stopCamera(); else void beginWorld(); };
  const [board, setBoard] = useState<ScoreEntry[]>(() => { try { return readToday(); } catch { return []; } });
  const recorded = useRef(false);
@@ -69,9 +82,10 @@ export function App() {
   if (game.phase !== 'results') { recorded.current = false; return; }
   if (recorded.current) return;
   recorded.current = true;
-  setBoard(recordToday({ points: game.points, fed: game.fed, combo: game.bestCombo, at: Date.now() }));
+  setBoard(recordToday({ nick: roundNick.current, points: game.points, fed: game.fed, combo: game.bestCombo, at: Date.now() }));
  }, [game.phase, game.points, game.fed, game.bestCombo]);
  useEffect(() => { const key = (e: KeyboardEvent) => { if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return; const delta: Record<string, [number, number]> = { ArrowUp: [0, -.15], ArrowDown: [0, .15], ArrowLeft: [-.15, 0], ArrowRight: [.15, 0] }; if (delta[e.key]) { e.preventDefault(); step(...delta[e.key]); } }; window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key); }, [step]);
+ const nickField = <label className="nick-field">Tu nick<input ref={nickInput} name="nickname" autoComplete="nickname" maxLength={20} required placeholder="Cómo querés aparecer en el ranking" value={nick} onChange={event=>{event.target.setCustomValidity('');setNick(event.target.value);}} onKeyDown={event=>{if(event.key==='Enter' && sceneReady && !event.nativeEvent.isComposing)start();}}/></label>;
  if (stand) return <StandPoster/>;
  return <main className={'phase-' + game.phase + (augmented ? ' spatial-ui' : '')}><a className="skip" href="#controls">Ir a los controles</a>
  <header><a className="brand" href={import.meta.env.BASE_URL} aria-label="Foody inicio" translate="no"><img src={`${import.meta.env.BASE_URL}${BrandConfig.logo}`} alt="" width="160" height="51"/><span className="brand-type"><small>AR Farm</small></span></a><span className="mode"><i/>{world.active ? 'AR sin marcador' : spatial ? 'AR espacial' : marker ? 'AR con marcador' : camera.active ? 'Cámara + granja' : 'Demo virtual'}</span></header>
@@ -89,9 +103,9 @@ export function App() {
  <div className={'status ' + boundary.state} role="status"><span className="status-dot"/>{game.safetyMessage || labels[boundary.state]}</div>{augmented && <p className="spatial-help" role="status">{world.active ? (game.safetyMessage || (!world.adapter.origin ? world.status.message : '')) : marker ? markerTracking.message : camera.active ? 'Superposición sin rastreo físico' : spatialMessage}</p>}</section>
  <p className="animal-roster" aria-label="Animales de la granja">2 gallinas · 3 pollitos · 2 conejos</p>
  <section className="play-panel" id="controls" aria-label="Alimentar animales" aria-describedby="throw-help">
- {game.phase === 'ready' && <><h2>Cómo jugar</h2><p className="howto">Mantené el campo, deslizá y soltá para tirar. El centro de la diana suma más; alimentá a todos los animales.</p>{!camera.active && !world.active && !spatial && <button type="button" className="secondary" disabled={!sceneReady || camera.busy || spatialBusy || world.status.phase === 'starting'} onClick={() => void beginWorld()}>{world.status.phase === 'starting' ? 'Abriendo cámara…' : 'Activar cámara'}</button>}<button className="primary" disabled={!sceneReady} onClick={start}>{sceneReady ? '¡A jugar! · 60 segundos' : 'Preparando la granja…'}</button><StudioCredit/></>}
+ {game.phase === 'ready' && <><h2>Entrá a la ronda</h2>{nickField}<p className="howto">Tenés un minuto. Elegí alimento, apuntá a una diana y soltá para lanzar.</p>{!camera.active && !world.active && !spatial && <button type="button" className="secondary" disabled={!sceneReady || camera.busy || spatialBusy || world.status.phase === 'starting'} onClick={() => void beginWorld()}>{world.status.phase === 'starting' ? 'Abriendo cámara…' : 'Activar cámara'}</button>}<button className="primary" disabled={!sceneReady} onClick={start}>{sceneReady ? '¡A jugar! · 60 segundos' : 'Preparando la granja…'}</button><StudioCredit/></>}
  {game.phase === 'playing' && <><h2>¿Qué les damos de comer?</h2><div className="foods" role="group" aria-label="Alimento seleccionado">{BrandConfig.foods.map(product => <button key={product.id} disabled={blocked} aria-pressed={food === product.id} onClick={() => { engine.selectedFood = product.id; setFood(product.id); setMessage(`${product.name} para ${product.animalLabel.toLowerCase()}. Mantené el campo y deslizá.`); }}><img src={`${import.meta.env.BASE_URL}${product.iconSrc}`} alt="" width="40" height="40"/><strong>{product.name}</strong><small>{product.animalLabel}</small></button>)}</div><p className="throw-hint">Mantené el campo, deslizá y soltá para tirar.</p><p className="throw-hint diana-hint">El centro de la diana suma más. La comida se queda para los animales.</p><p className="game-message" data-blocked={!!game.safetyMessage || paused || editing} role="status">{game.safetyMessage || (editing ? 'Ajustando la granja. Tocá Listo para seguir.' : paused ? 'Partida pausada. Reanudá cuando quieras.' : message)}</p><button className="serve" disabled={blocked} onClick={serveHere}>Servir en el explorador</button><small className="placeholder-note">El botón sirve donde está el explorador, sin deslizar.</small></>}
- {game.phase === 'results' && <><span className="result-icon" aria-hidden="true">♡</span><h2>¡Una granja llena de felicidad!</h2><strong className="result-points">{game.points} <small>puntos</small></strong><p>{game.fed} {game.fed === 1 ? 'comida' : 'comidas'} · {game.rings} en dianas · combo {game.bestCombo}{game.bonus ? ` · bonus +${SPREAD_BONUS}` : ''}</p><ul className="result-feeds" data-testid="result-feeds">{game.roster.map(group => <li key={group.id}><strong>{group.label}</strong> <span>{group.meals} {group.meals === 1 ? 'comida' : 'comidas'} · {group.fed}/{group.total}</span></li>)}</ul><ShareCard result={{ points: game.points, fed: game.fed, bestCombo: game.bestCombo }}/><h3 className="board-title">Récords de hoy</h3><ScoreList scores={board}/><StudioCredit/><button className="primary" onClick={start}>Volver a jugar</button></>}
+ {game.phase === 'results' && <><span className="result-icon" aria-hidden="true">♡</span><h2>¡Una granja llena de felicidad!</h2><strong className="result-points">{game.points} <small>puntos</small></strong><p>{game.fed} {game.fed === 1 ? 'comida' : 'comidas'} · {game.rings} en dianas · combo {game.bestCombo}{game.bonus ? ` · bonus +${SPREAD_BONUS}` : ''}</p><ul className="result-feeds" data-testid="result-feeds">{game.roster.map(group => <li key={group.id}><strong>{group.label}</strong> <span>{group.meals} {group.meals === 1 ? 'comida' : 'comidas'} · {group.fed}/{group.total}</span></li>)}</ul><ShareCard result={{ points: game.points, fed: game.fed, bestCombo: game.bestCombo }}/><h3 className="board-title">Récords de hoy en este dispositivo</h3><ScoreList scores={board}/><StudioCredit/>{nickField}<button className="primary" onClick={start}>Volver a jugar</button></>}
  </section>
  {game.phase === 'ready' && <details className="leaderboard"><summary>Récords de hoy en esta pantalla</summary><ScoreList scores={board}/></details>}
  <details className="explore-controls" hidden={augmented}><summary>Mover explorador y probar límites</summary><section className="controls" aria-label="Navegación virtual"><div className="instruction"><span className="footprint" aria-hidden="true">⌖</span><div><h2>Mové tu explorador</h2><p>Usá las flechas para elegir dónde servir.</p></div><button className="reset" onClick={() => move({ x: 0, z: 0 })}>Centrar</button></div><div className="direction"><button aria-label="Mover a la izquierda" onClick={() => step(-.15, 0)}>←</button><button aria-label="Mover hacia el fondo" onClick={() => step(0, -.15)}>↑</button><button aria-label="Mover hacia adelante" onClick={() => step(0, .15)}>↓</button><button aria-label="Mover a la derecha" onClick={() => step(.15, 0)}>→</button></div><button className="debug-toggle" aria-expanded={debug} aria-controls="debug-panel" onClick={() => setDebug(!debug)}>{debug ? 'Cerrar pruebas' : 'Probar límites'}</button></section>
@@ -113,5 +127,5 @@ export function App() {
 }
 function ScoreList({ scores }: { scores: ScoreEntry[] }) {
  if (!scores.length) return <p className="score-empty">Todavía no hay récords hoy.</p>;
- return <ol className="score-list" aria-label="Récords de hoy">{scores.map((entry, index) => <li key={`${entry.at}-${index}`}><strong>{entry.points}</strong> <span>{entry.fed} comidas · combo {entry.combo}</span></li>)}</ol>;
+ return <ol className="score-list" aria-label="Récords de hoy">{scores.map((entry, index) => <li key={`${entry.at}-${index}`}><b className="rank-nick">{entry.nick || "Visitante"}</b> <strong>{entry.points} pts</strong> <span>{entry.fed} comidas · combo {entry.combo}</span></li>)}</ol>;
 }

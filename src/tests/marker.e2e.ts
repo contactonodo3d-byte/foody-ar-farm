@@ -11,7 +11,7 @@ test('real marker detector tracks synthetic video, pauses on loss, and restores 
  await page.goto('/');await page.getByText('Prueba técnica opcional con marcador',{exact:true}).click();await page.getByRole('button',{name:'Probar AR con marcador',exact:true}).click();
  await expect(page.getByText('AR con marcador',{exact:true})).toBeVisible();
  await expect(page.getByText('Marcador reconocido. Mantenelo dentro de la imagen.',{exact:true})).toBeVisible({timeout:15000});
- await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();
+ await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();
  await expect(page.locator('button.serve')).toBeEnabled();
  await page.screenshot({path:'test-results/marker-tracked.png',fullPage:true});
  await page.evaluate(()=>{(window as unknown as {showMarker:boolean}).showMarker=false;});

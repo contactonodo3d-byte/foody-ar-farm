@@ -62,12 +62,6 @@ function BoundaryWall({edge,paused}:{edge:ReturnType<typeof evaluateBoundaryEdge
 function Walls({position,paused}:{position:Position;paused:boolean}) {
  return <group>{evaluateBoundaryEdges(position).map(edge=><BoundaryWall key={edge.id} edge={edge} paused={paused}/>)}</group>;
 }
-function ToyBarn(){return <group position={[-0.85,0,-0.85]}>
- <mesh position={[0,.25,0]} castShadow><boxGeometry args={[.6,.5,.48]}/><meshStandardMaterial color="#e87455"/></mesh>
- <mesh position={[0,.57,0]} rotation={[0,Math.PI/4,0]} castShadow><coneGeometry args={[.47,.35,4]}/><meshStandardMaterial color="#934f43"/></mesh>
- <mesh position={[0,.17,.246]}><boxGeometry args={[.19,.34,.01]}/><meshStandardMaterial color="#754a39"/></mesh>
- <mesh position={[0,.2,.26]}><boxGeometry args={[.018,.3,.01]}/><meshStandardMaterial color="#fff3d4"/></mesh>
- </group>}
 function Scene({onPlacementChange,editing,position,state,onMove,onThrowNotice,paused,engine,reduced,cameraOverlay,marker,markerPose,world,worldAdapter,spatial,spatialControls,onSpatialStatus}:{onPlacementChange:()=>void;editing:boolean;world:boolean;worldAdapter:WorldTrackingAdapter;marker:boolean;markerPose:RefObject<MarkerPose|null>;spatial:boolean;spatialControls:RefObject<SpatialControls|null>;onSpatialStatus:(status:SpatialStatus)=>void;cameraOverlay:boolean;reduced:boolean;engine:GameEngine;position:Position;state:BoundaryState;onMove:(p:Position)=>void;onThrowNotice:(message:string)=>void;paused:boolean}){
  const farm=useRef<THREE.Group>(null);
  const transparent=cameraOverlay||spatial||world;
@@ -81,7 +75,7 @@ function Scene({onPlacementChange,editing,position,state,onMove,onThrowNotice,pa
  <mesh visible={!transparent} rotation={[-Math.PI/2,0,0]} position={[0,-.09,0]} onPointerUp={click} receiveShadow><planeGeometry args={[200,200]}/><meshBasicMaterial color={BrandConfig.colors.sky} toneMapped={false}/></mesh>
  <mesh visible={!transparent} position={[0,-.07,0]} receiveShadow><boxGeometry args={[3,.14,3]}/><meshStandardMaterial color={BrandConfig.colors.olive}/></mesh>
  <mesh rotation={[-Math.PI/2,0,0]} position={[0,.004,0]} onPointerUp={click} receiveShadow><planeGeometry args={[3,3]}/><meshStandardMaterial color={BrandConfig.colors.field} transparent={transparent} opacity={transparent?.10:1}/></mesh>
- <gridHelper visible={!transparent} args={[3,6,BrandConfig.colors.olive,BrandConfig.colors.sage]} position={[0,.006,0]}/><AreaOutline/><ToyBarn/>
+ <gridHelper visible={!transparent} args={[3,6,BrandConfig.colors.olive,BrandConfig.colors.sage]} position={[0,.006,0]}/><AreaOutline/>
  {Array.from({length:16},(_,i)=><mesh key={i} position={[Math.sin(i*27)*1.25,.025,Math.cos(i*17)*1.25]} rotation={[-Math.PI/2,0,0]}><circleGeometry args={[.018,5]}/><meshBasicMaterial color={i%3?'#f6f8b6':'#fffef4'}/></mesh>)}
  <mesh position={[position.x,.035,position.z]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.09,.14,32]}/><meshBasicMaterial color={BrandConfig.colors.ink} side={THREE.DoubleSide}/></mesh>
  <mesh position={[position.x,.13,position.z]} castShadow><sphereGeometry args={[.075,16,12]}/><meshStandardMaterial color="#fff9e8"/></mesh>

@@ -7,7 +7,7 @@ test('a round shows dianas, scores a hit, respawns, and ranks points', async ({ 
  await expect(page.getByRole('button', { name: 'Activar cámara', exact: true })).toBeVisible();
  await expect(page.getByRole('button', { name: 'Cámara', exact: true })).toBeVisible();
  await page.screenshot({ path: 'test-results/targets-start.png', fullPage: true });
- await page.getByRole('button', { name: '¡A jugar! · 60 segundos' }).click();
+ await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button', { name: '¡A jugar! · 60 segundos' }).click();
  await expect(page.getByTestId('target')).toHaveCount(2);
  await expect(page.getByText('El centro de la diana suma más', { exact: false })).toBeVisible();
  const hit = await page.evaluate(() => {
@@ -44,6 +44,7 @@ test('a round shows dianas, scores a hit, respawns, and ranks points', async ({ 
  });
  await expect(page.getByRole('heading', { name: '¡Una granja llena de felicidad!' })).toBeVisible();
  await expect(page.getByRole('list', { name: 'Récords de hoy' })).toBeVisible();
+ await expect(page.getByRole('list', { name: 'Récords de hoy' })).toContainText('Luna');
  await expect(page.getByRole('link', { name: 'Guardar imagen' })).toBeVisible();
  const caption = await page.getByRole('textbox', { name: 'Texto para la historia' }).inputValue();
  expect(caption).toContain(String(hit.points));

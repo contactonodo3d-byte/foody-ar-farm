@@ -129,3 +129,18 @@ header{position:sticky;top:0;z-index:6;gap:8px;flex-wrap:wrap;background:color-m
 .spatial-ui .play-panel,.spatial-ui .world-placement,.spatial-ui .status,.spatial-ui .spatial-help{text-shadow:0 1px 1px rgba(0,0,0,.18)}
 button{min-height:48px}
 @media (prefers-reduced-motion:reduce){.play-panel,.score-pop{animation:none}}
+
+.nick-field{display:grid;gap:5px;text-align:left;font-size:13px;font-weight:700;margin:8px 0 12px}
+.nick-field input{font:inherit;font-size:16px;font-weight:500;width:100%;min-height:44px;border:1px solid var(--olive);border-radius:12px;background:var(--paper);color:var(--ink);padding:8px 12px}
+.rank-nick{overflow-wrap:anywhere;color:var(--oliveDeep)}
+.spatial-ui.phase-playing .play-panel .throw-hint,.spatial-ui.phase-ready .play-panel .studio-credit{display:none}
+.spatial-ui.phase-playing .scoreboard .feed-caption{display:none}
+.spatial-ui.phase-ready .gesture-hint{display:none}
+.phase-ready:not(.spatial-ui) .play-panel{border-top:4px solid var(--olive);text-align:left}
+.spatial-ui .scoreboard .feed-meters>span{display:grid;grid-template-columns:auto auto;align-items:center;gap:2px 4px;text-align:center}
+.spatial-ui .scoreboard .feed-meters strong{font-size:13px}
+.spatial-ui .scoreboard .feed-meters .dots{grid-column:1/-1;display:flex;justify-content:center;margin:0}
+.spatial-ui .scoreboard .feed-meters .dots i{width:6px;height:6px}
+.spatial-ui.phase-playing .farm .status{top:calc(env(safe-area-inset-top) + 152px)}
+.spatial-ui.phase-playing .play-panel{padding:6px 8px}
+.phase-ready .nick-field input:focus-visible{outline-offset:2px}

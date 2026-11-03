@@ -10,14 +10,7 @@ export const animalConfig: Record<Species, { radius: number; speed: number }> = 
  chicken: { radius: AnimalDimensions.chicken.radius, speed: .22 }, chick: { radius: AnimalDimensions.chick.radius, speed: .37 }, rabbit: { radius: AnimalDimensions.rabbit.radius, speed: .32 },
 };
 export function walkable(p: Position, radius: number): Position {
- const q = contain(p, radius);
- // Keep animals outside the barn footprint, including their body radius.
- const left = -1.15 - radius, right = -.55 + radius, back = -1.09 - radius, front = -.61 + radius;
- if (q.x > left && q.x < right && q.z > back && q.z < front) {
-  const exits = [{d:q.x-left,x:left,z:q.z},{d:right-q.x,x:right,z:q.z},{d:q.z-back,x:q.x,z:back},{d:front-q.z,x:q.x,z:front}];
-  exits.sort((a,b)=>a.d-b.d); return contain(exits[0],radius);
- }
- return q;
+ return contain(p, radius);
 }
 export class AnimalAI {
  animals: Animal[];

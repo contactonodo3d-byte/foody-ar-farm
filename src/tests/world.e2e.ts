@@ -9,7 +9,7 @@ test('missing runtime stays disabled and never requests vendor code or camera',a
  await page.goto('/');await expect(page.getByRole('button',{name:'Probar AR sin marcador',exact:true})).toBeDisabled();
  await expect(page.getByText('Motor pendiente de activar para esta prueba local.')).toBeVisible();
  expect(requests.some(url=>url.endsWith('/vendor/xr8/xr.js'))).toBe(false);
- await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();await expect(page.getByTestId('timer')).toBeVisible();
+ await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();await expect(page.getByTestId('timer')).toBeVisible();
 });
 test('SDK contract: placement, tracking loss, recovery, orientation and exit',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await installed(page);
@@ -55,7 +55,7 @@ test('SDK contract: placement, tracking loss, recovery, orientation and exit',as
  await expect(page.getByLabel('Transformación de la granja')).toHaveText('100% · 0°');
  await page.screenshot({path:'test-results/world-adjustments.png',fullPage:true});
  await page.getByRole('button',{name:'Listo',exact:true}).click();
- await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();
+ await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();
  await expect(page.locator('button.serve')).toBeEnabled();
  await expect(page.getByRole('button',{name:'Más opciones de colocación'})).toHaveCount(0);
  const tray=await page.locator('.play-panel').boundingBox();expect(tray!.height).toBeLessThan(115);

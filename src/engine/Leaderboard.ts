@@ -1,4 +1,4 @@
-export interface ScoreEntry { points: number; fed: number; combo: number; at: number }
+export interface ScoreEntry { nick?: string; points: number; fed: number; combo: number; at: number }
 
 const KEY = 'foody-ar-farm-today';
 

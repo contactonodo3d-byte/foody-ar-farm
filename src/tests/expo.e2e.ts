@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('flick throws food and the round can still be served with the button', async ({ page }) => {
  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
  await page.goto('/');
- await page.getByRole('button', { name: '¡A jugar! · 60 segundos' }).click();
+ await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button', { name: '¡A jugar! · 60 segundos' }).click();
  await expect(page.getByText('Mantené el campo, deslizá y soltá para tirar.')).toBeVisible();
  const canvas = page.locator('canvas[data-engine]');
  const box = await canvas.boundingBox();
@@ -20,7 +20,7 @@ test('flick throws food and the round can still be served with the button', asyn
 test('results card names Foody and the stand QR uses the public URL', async ({ page }) => {
  await page.clock.install();
  await page.goto('/');
- await page.getByRole('button', { name: '¡A jugar! · 60 segundos' }).click();
+ await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button', { name: '¡A jugar! · 60 segundos' }).click();
  await page.clock.fastForward(61000);
  await page.clock.runFor(300);
  await expect(page.getByText('Etiquetá a @foody en tu historia')).toBeVisible();

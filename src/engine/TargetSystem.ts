@@ -14,7 +14,6 @@ export const TargetRules = {
   ],
 } as const;
 
-const BARN = { minX: -1.15, maxX: -0.55, minZ: -1.09, maxZ: -0.61 };
 
 export interface Target {
   id: number;
@@ -57,12 +56,6 @@ export function fullyInside(position: Position) {
   if (!Number.isFinite(position.x) || !Number.isFinite(position.z)) return false;
   const limit = innerLimit();
   return Math.abs(position.x) <= limit + 1e-9 && Math.abs(position.z) <= limit + 1e-9;
-}
-
-export function coversBarn(position: Position) {
-  const nearestX = Math.max(BARN.minX, Math.min(position.x, BARN.maxX));
-  const nearestZ = Math.max(BARN.minZ, Math.min(position.z, BARN.maxZ));
-  return Math.hypot(position.x - nearestX, position.z - nearestZ) < outerRadius() - 1e-9;
 }
 
 export function overlapsTargets(position: Position, others: Position[]) {
@@ -137,7 +130,7 @@ export class TargetSystem {
   private search(animals: { position: Position }[], away: Position | null, strict: boolean) {
     for (let attempt = 0; attempt < 36; attempt += 1) {
       const position = this.sample();
-      if (!fullyInside(position) || coversBarn(position) || overlapsTargets(position, this.active)) continue;
+      if (!fullyInside(position) || overlapsTargets(position, this.active)) continue;
       if (strict && crowdsAnimal(position, animals)) continue;
       if (strict && away && Math.hypot(position.x - away.x, position.z - away.z) < outerRadius() + TargetRules.gap) continue;
       const target = { id: this.seq++, x: position.x, z: position.z };

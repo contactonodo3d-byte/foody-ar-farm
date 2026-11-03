@@ -8,5 +8,5 @@ describe('animal simulation',()=>{
  });
  it('moves every species and is deterministic with a fixed seed',()=>{const a=new AnimalAI(9),b=new AnimalAI(9);const initial=structuredClone(a.animals);for(let i=0;i<300;i++){a.update(1/30);b.update(1/30);}expect(a.animals).toEqual(b.animals);for(const animal of a.animals)expect(animal.position).not.toEqual(initial.find(x=>x.id===animal.id)?.position);});
  it('ignores invalid time and caps long background gaps',()=>{const ai=new AnimalAI();const initial=structuredClone(ai.animals);ai.update(NaN);ai.update(-1);expect(ai.animals).toEqual(initial);ai.update(100);expect(ai.animals[0].phase).toBeCloseTo(.25);});
- it('projects targets outside the barn and within the farm',()=>{const p=walkable({x:-.85,z:-.85},.18);expect(p.x<=-1.33||p.x>=-.37||p.z<=-1.27||p.z>=-.43).toBe(true);expect(walkable({x:4,z:-4},.18)).toEqual({x:1.32,z:-1.32});});
+ it('projects targets within the full farm',()=>{const p=walkable({x:-.85,z:-.85},.18);expect(p).toEqual({x:-.85,z:-.85});expect(walkable({x:4,z:-4},.18)).toEqual({x:1.32,z:-1.32});});
 });

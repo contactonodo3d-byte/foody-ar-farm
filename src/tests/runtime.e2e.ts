@@ -30,5 +30,5 @@ test('actual SDK startup failure restores the virtual game without hardware acce
  await page.goto('/');await page.getByRole('button',{name:'Probar AR sin marcador',exact:true}).click();
  await expect(page.locator('.world-controls [role=alert]')).toBeVisible({timeout:35000});
  await expect(page.getByText('Demo virtual',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();await expect(page.getByTestId('timer')).toBeVisible();
+ await page.getByRole('textbox',{name:'Tu nick'}).fill('Luna');await page.getByRole('button',{name:'¡A jugar! · 60 segundos'}).click();await expect(page.getByTestId('timer')).toBeVisible();
 });

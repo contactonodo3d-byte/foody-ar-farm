@@ -3,7 +3,7 @@ import { AnimalAI } from '../engine/AnimalAI';
 import { VirtualAdapter } from '../ar/ExperienceAdapter';
 import { GameEngine } from '../engine/GameEngine';
 import { SPREAD_BONUS, ScoreSystem } from '../engine/ScoreSystem';
-import { TargetRules, TargetSystem, coversBarn, fullyInside, innerLimit, outerRadius, overlapsTargets, ringPoints } from '../engine/TargetSystem';
+import { TargetRules, TargetSystem, fullyInside, innerLimit, outerRadius, overlapsTargets, ringPoints } from '../engine/TargetSystem';
 
 function mulberry(seed: number) {
  let state = seed >>> 0;
@@ -29,7 +29,7 @@ describe('diana rings', () => {
   expect(ringPoints(Number.NaN)).toBeNull();
  });
 
- it('spawns every target fully inside the field, clear of the barn and of each other', () => {
+ it('spawns every target fully inside the field, clear of each other', () => {
   for (let seed = 1; seed <= 40; seed += 1) {
    const animals = new AnimalAI(seed).animals;
    const system = new TargetSystem(mulberry(seed));
@@ -39,7 +39,7 @@ describe('diana rings', () => {
     expect(fullyInside(target)).toBe(true);
     expect(Math.abs(target.x)).toBeLessThanOrEqual(innerLimit() + 1e-6);
     expect(Math.abs(target.z)).toBeLessThanOrEqual(innerLimit() + 1e-6);
-    expect(coversBarn(target)).toBe(false);
+
     expect(Math.abs(target.x) + outerRadius()).toBeLessThanOrEqual(1.5 + 1e-6);
     expect(Math.abs(target.z) + outerRadius()).toBeLessThanOrEqual(1.5 + 1e-6);
    }
