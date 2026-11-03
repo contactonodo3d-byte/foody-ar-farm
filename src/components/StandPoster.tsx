@@ -6,14 +6,14 @@ export function StandPoster() {
  const [qr, setQr] = useState('');
  useEffect(() => {
   let alive = true;
-  void import('qrcode').then(mod => mod.toDataURL(url, { width: 720, margin: 1, color: { dark: '#274e43', light: '#fffdf2' } })).then(data => { if (alive) setQr(data); }).catch(() => { if (alive) setQr(''); });
+  void import('qrcode').then(mod => mod.toDataURL(url, { width: 720, margin: 1, color: { dark: BrandConfig.colors.ink, light: BrandConfig.colors.paper } })).then(data => { if (alive) setQr(data); }).catch(() => { if (alive) setQr(''); });
   return () => { alive = false; };
  }, [url]);
  return <main className="stand">
-  <p className="chapter">Expo Vet 2026 · Asunción</p>
-  <img className="stand-logo" src={`${import.meta.env.BASE_URL}${BrandConfig.logo}`} alt="" width="72" height="72"/>
+  <p className="chapter">Mascotas más felices · Expo Vet 2026</p>
+  <img className="stand-logo" src={`${import.meta.env.BASE_URL}${BrandConfig.logo}`} alt="Foody" width="320" height="102"/>
   <h1>{BrandConfig.name} AR Farm</h1>
-  <p>Escaneá y jugá en tu teléfono. Un minuto, tres alimentos y una granja para compartir.</p>
+  <p>Escaneá y jugá un minuto en la granja. Tirás alimento, acertás las dianas y alimentás a todos.</p>
   {qr ? <img className="stand-qr" src={qr} width="280" height="280" alt={`Código QR para abrir ${url}`}/> : <p>Preparando el código…</p>}
   <p className="stand-url">{url}</p>
   <a className="primary stand-open" href={import.meta.env.BASE_URL}>Abrir el juego en esta pantalla</a>

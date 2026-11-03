@@ -2,6 +2,7 @@ import {cpSync,existsSync,mkdirSync,readFileSync,writeFileSync,readdirSync} from
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
+import {foodyBasePath} from './base-path.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const consent=JSON.parse(readFileSync(path.join(root,'xr8-installation.json'),'utf8'));
 const source=path.join(root,'node_modules/@8thwall/engine-binary');
@@ -22,5 +23,5 @@ function inventory(directory,prefix=''){
 }
 inventory(path.join(source,'dist'));
 writeFileSync(path.join(target,'installation.json'),JSON.stringify({package:pkg.name,version:pkg.version,acceptedOn:consent.acceptedOn,license:consent.license,sha256:hashes},null,2)+'\n');
-writeFileSync(path.join(target,'manifest.json'),JSON.stringify({enabled:true,licenseAccepted:true,script:'/vendor/xr8/xr.js',version:pkg.version},null,2)+'\n');
+writeFileSync(path.join(target,'manifest.json'),JSON.stringify({enabled:true,licenseAccepted:true,script:`${foodyBasePath()}vendor/xr8/xr.js`,version:pkg.version},null,2)+'\n');
 console.log(`Official XR8 ${pkg.version}: ${Object.keys(hashes).length} unmodified artifacts synchronized locally.`);

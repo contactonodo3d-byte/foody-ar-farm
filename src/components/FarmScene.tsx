@@ -14,7 +14,8 @@ import { Component, Suspense, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { evaluateBoundaryEdges, type Position, type BoundaryState } from '../engine/BoundarySystem';
 import { useReducedMotion } from '../hooks/useReducedMotion';
-import { FarmConfig } from '../config/BrandConfig';
+import { Targets } from './Targets';
+import { BrandConfig, FarmConfig } from '../config/BrandConfig';
 
 function AreaOutline() {
  const half = FarmConfig.halfSize;
@@ -22,17 +23,17 @@ function AreaOutline() {
   {[-half, half].map(edge => <group key={edge}>
    <mesh position={[0, .018, edge]} raycast={() => {}}>
     <boxGeometry args={[half * 2, .022, .035]}/>
-    <meshBasicMaterial color="#fff7ce"/>
+    <meshBasicMaterial color={BrandConfig.colors.paper}/>
    </mesh>
    <mesh position={[edge, .018, 0]} raycast={() => {}}>
     <boxGeometry args={[.035, .022, half * 2]}/>
-    <meshBasicMaterial color="#fff7ce"/>
+    <meshBasicMaterial color={BrandConfig.colors.paper}/>
    </mesh>
   </group>)}
   {[-half, half].flatMap(x => [-half, half].map(z =>
    <mesh key={`${x}:${z}`} position={[x, .04, z]} raycast={() => {}}>
     <cylinderGeometry args={[.055, .055, .08, 12]}/>
-    <meshStandardMaterial color="#315e4b"/>
+    <meshStandardMaterial color={BrandConfig.colors.olive}/>
    </mesh>
   ))}
  </group>;
@@ -71,20 +72,21 @@ function Scene({onPlacementChange,editing,position,state,onMove,onThrowNotice,pa
  const farm=useRef<THREE.Group>(null);
  const transparent=cameraOverlay||spatial||world;
  const click=(e:ThreeEvent<PointerEvent>)=>{if(spatial||engine.phase==='playing')return;e.stopPropagation();if(e.delta<8)onMove(farm.current?farm.current.worldToLocal(e.point.clone()):{x:e.point.x,z:e.point.z});};
- return <>{!transparent&&<color attach="background" args={['#dff3ff']}/>}<ambientLight intensity={1.25}/><directionalLight position={[3,6,4]} intensity={1.85} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-4} shadow-camera-right={4} shadow-camera-top={4} shadow-camera-bottom={-4}/>
+ return <>{!transparent&&<color attach="background" args={[BrandConfig.colors.sky]}/>}<ambientLight intensity={1.25}/><directionalLight position={[3,6,4]} intensity={1.85} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-4} shadow-camera-right={4} shadow-camera-top={4} shadow-camera-bottom={-4}/>
  <SpatialSession engine={engine} farm={farm} controls={spatialControls} onStatus={onSpatialStatus}/>
  <PlacementGestures adapter={worldAdapter} enabled={world&&editing} onChange={onPlacementChange}/>
  <WorldTrackingScene active={world} adapter={worldAdapter} farm={farm}/>
  <MarkerScene farm={farm} pose={markerPose} enabled={marker}/>
  <group ref={farm}>
- <mesh visible={!transparent} rotation={[-Math.PI/2,0,0]} position={[0,-.09,0]} onPointerUp={click} receiveShadow><planeGeometry args={[200,200]}/><meshBasicMaterial color="#dff3ff" toneMapped={false}/></mesh>
- <mesh visible={!transparent} position={[0,-.07,0]} receiveShadow><boxGeometry args={[3,.14,3]}/><meshStandardMaterial color="#80ad50"/></mesh>
- <mesh rotation={[-Math.PI/2,0,0]} position={[0,.004,0]} onPointerUp={click} receiveShadow><planeGeometry args={[3,3]}/><meshStandardMaterial color="#b7d878" transparent={transparent} opacity={transparent?.10:1}/></mesh>
- <gridHelper visible={!transparent} args={[3,6,'#a0c466','#a7ce70']} position={[0,.006,0]}/><AreaOutline/><ToyBarn/>
+ <mesh visible={!transparent} rotation={[-Math.PI/2,0,0]} position={[0,-.09,0]} onPointerUp={click} receiveShadow><planeGeometry args={[200,200]}/><meshBasicMaterial color={BrandConfig.colors.sky} toneMapped={false}/></mesh>
+ <mesh visible={!transparent} position={[0,-.07,0]} receiveShadow><boxGeometry args={[3,.14,3]}/><meshStandardMaterial color={BrandConfig.colors.olive}/></mesh>
+ <mesh rotation={[-Math.PI/2,0,0]} position={[0,.004,0]} onPointerUp={click} receiveShadow><planeGeometry args={[3,3]}/><meshStandardMaterial color={BrandConfig.colors.field} transparent={transparent} opacity={transparent?.10:1}/></mesh>
+ <gridHelper visible={!transparent} args={[3,6,BrandConfig.colors.olive,BrandConfig.colors.sage]} position={[0,.006,0]}/><AreaOutline/><ToyBarn/>
  {Array.from({length:16},(_,i)=><mesh key={i} position={[Math.sin(i*27)*1.25,.025,Math.cos(i*17)*1.25]} rotation={[-Math.PI/2,0,0]}><circleGeometry args={[.018,5]}/><meshBasicMaterial color={i%3?'#f6f8b6':'#fffef4'}/></mesh>)}
- <mesh position={[position.x,.035,position.z]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.09,.14,32]}/><meshBasicMaterial color="#244e49" side={THREE.DoubleSide}/></mesh>
+ <mesh position={[position.x,.035,position.z]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.09,.14,32]}/><meshBasicMaterial color={BrandConfig.colors.ink} side={THREE.DoubleSide}/></mesh>
  <mesh position={[position.x,.13,position.z]} castShadow><sphereGeometry args={[.075,16,12]}/><meshStandardMaterial color="#fff9e8"/></mesh>
  <ThrowControl farm={farm} engine={engine} enabled={engine.phase==='playing'&&!paused} onNotice={onThrowNotice}/>
+ <Targets engine={engine} reduced={reduced}/>
  <Animals engine={engine} paused={paused} reduced={reduced}/><FoodEffects engine={engine} reduced={reduced}/><Walls position={position} paused={paused||reduced}/>
  </group></>;
 }

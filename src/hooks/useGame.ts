@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import type { GameEngine } from '../engine/GameEngine';
-export function useGame(engine:GameEngine,paused:boolean){
+export function useGame(engine:GameEngine,paused:boolean,revision=0){
  const [snapshot,setSnapshot]=useState(()=>engine.snapshot());
- useLayoutEffect(()=>{engine.paused=paused;setSnapshot(engine.snapshot());},[engine,paused]);
+ useLayoutEffect(()=>{engine.paused=paused;setSnapshot(engine.snapshot());},[engine,paused,revision]);
  useEffect(()=>{
   let frame=0,last=performance.now();
   const resetClock=()=>{last=performance.now();};

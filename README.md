@@ -4,21 +4,35 @@ Mobile-first expo game for the Foody stand at Expo Vet 2026 (Asunción). Virtual
 
 ## Public link tonight
 
-The GitHub Pages address is **https://contactonodo3d-byte.github.io/foody-ar-farm/**
+The stand URL is **https://fabrizzioruiz.com/lab/foody-ar-game/**
 
-After this pull request is merged into `main`:
+That address is the portfolio site. `fabrizzio-portfolio` checks out this repo on each Pages deploy, builds with `FOODY_BASE_PATH=/lab/foody-ar-game/`, and publishes the result at that path. `/lab/foody-ar-game` without a trailing slash redirects to the slash URL.
 
-1. Open the repository on GitHub → **Settings** → **Pages**.
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. Open the **Actions** tab. The workflow **Deploy GitHub Pages** starts on the merge. If it does not, open that workflow and choose **Run workflow**.
-4. When the job is green, open the URL above on the phone (Safari or Chrome). Accept the camera only from the “Activar cámara” or “Probar AR” buttons.
-5. On the stand tablet, open the same URL with `?stand=1` for the QR poster. The QR reads `VITE_PUBLIC_URL`, which the workflow sets to that Pages URL.
+On the stand tablet, open **https://fabrizzioruiz.com/lab/foody-ar-game/?stand=1** for the QR poster. The QR and the share caption use `VITE_PUBLIC_URL` (default `https://fabrizzioruiz.com/lab/foody-ar-game/`). Open the same URL without `?stand=1` on a phone (Safari or Chrome). Accept the camera only from the “Activar cámara” or “Probar AR” buttons.
 
-`npm run build` runs `prebuild`, which runs `npm run sync:xr8` and copies the pinned `@8thwall/engine-binary` into `public/vendor/xr8` before Vite runs. The Pages workflow installs with `npm ci`, so that sync works in CI. The engine loads `xr-slam.js` relative to the script URL, so the `/foody-ar-farm/` base path stays on the same origin.
+`npm run build` runs `prebuild`, which runs `npm run sync:xr8` and copies the pinned `@8thwall/engine-binary` into `public/vendor/xr8` before Vite runs. The manifest script path uses the same base, and the engine loads `xr-slam.js` relative to that script URL.
 
-**Vercel (alternative, often faster):** [vercel.com/new](https://vercel.com/new) → import this repo → Framework **Vite** → leave `FOODY_BASE_PATH` empty (the site is the domain root) → Deploy. Then set `VITE_PUBLIC_URL` to the Vercel URL and redeploy so the QR matches. `vercel.json` is already in the repo.
+This repo's own GitHub Pages workflow still publishes **https://contactonodo3d-byte.github.io/foody-ar-farm/** with `FOODY_BASE_PATH=/foody-ar-farm/`. Its QR and share text point at fabrizzioruiz.com, not github.io.
 
-**Netlify:** Add site → import the repo → build `npm run build`, publish `dist`. `netlify.toml` is included. Set `VITE_PUBLIC_URL` the same way if the QR should point at Netlify instead of Pages.
+**Vercel (alternative):** [vercel.com/new](https://vercel.com/new) → import this repo → Framework **Vite** → set `FOODY_BASE_PATH=/` (empty also means the domain root) → Deploy. Set `VITE_PUBLIC_URL` to the URL you want on the QR. `vercel.json` is already in the repo.
+
+**Netlify:** Add site → import the repo → build `npm run build`, publish `dist`. `netlify.toml` is included. Set `FOODY_BASE_PATH=/` when the site is the domain root, and set `VITE_PUBLIC_URL` to that public URL.
+
+### Redeploy fabrizzioruiz.com after a Foody change
+
+The portfolio workflow **Deploy portfolio to GitHub Pages** runs on push to its `main`, on **Run workflow** (optional `foody_ref`, default `main`), and on `repository_dispatch` with event type `foody-updated` (`client_payload.ref` can name a branch).
+
+A workflow in this repo cannot send that dispatch with the default `GITHUB_TOKEN`: that token cannot start a workflow in another repository, and storing a personal access token is required. Until that secret exists, merge here and then run **Deploy portfolio to GitHub Pages** from the portfolio Actions tab.
+
+With a fine-grained token that can write `workflow` on `contactonodo3d-byte/fabrizzio-portfolio` stored as a secret:
+
+```sh
+curl -sS -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Accept: application/vnd.github+json" \
+  https://api.github.com/repos/contactonodo3d-byte/fabrizzio-portfolio/dispatches \
+  -d '{"event_type":"foody-updated"}'
+```
 
 ## Preview
 
@@ -33,8 +47,9 @@ Local HTTPS:
 HTTPS=1 npm run dev -- --port 5175 --strictPort
 ```
 
-- Mac: https://localhost:5175/
-- iPhone on the same Wi-Fi: https://192.168.100.2:5175/ (the LAN address can change).
+- Mac: https://localhost:5175/lab/foody-ar-game/
+- iPhone on the same Wi-Fi: https://192.168.100.2:5175/lab/foody-ar-game/ (the LAN address can change).
+- `FOODY_BASE_PATH=/ npm run dev` serves the game at the domain root instead.
 - Allow incoming Node connections in macOS Firewall if prompted.
 - Virtual mode needs no camera. Camera opens only from the explicit “Activar cámara” button.
 
@@ -45,7 +60,7 @@ The SSL plugin generates a self-signed development certificate. A Safari excepti
 1. Tap “¡A jugar!” for a 60-second round.
 2. Select Maíz for chickens, Mix mini for chicks, or Verdecitos for rabbits. Art and names live in `src/config/BrandConfig.ts`.
 3. Press and hold on the field (a bag or bowl, a charge ring and a dotted arc), then swipe and release to throw. The morsel flies with gravity, bounces inside the 3×3 field and never leaves it. Animals react to where it settles. “Servir en el explorador” and the arrow keys remain the accessible fallback. In immersive WebXR, a tap on the surface still serves along the ray.
-4. Consecutive meals within five seconds increase the combo. Every three additional meals raises the multiplier, up to ×4. Each meal starts at 100 points.
+4. Consecutive meals within five seconds increase the combo. Every three additional meals raises the multiplier, up to ×4. Each meal starts at 100 points. Two dianas sit on the ground: the center is worth 150, the middle ring 80 and the outer ring 40. Hitting one pops it and another appears. The food stays for the animals. When every animal has eaten at least once, the round adds 200 points.
 5. Pause whenever needed. Switching away from the page pauses virtual gameplay time. Camera tracks stop when the page is hidden; reopen the camera explicitly on return.
 6. Results generate an original 1080 × 1920 PNG. Use native file sharing when available or save the image. Canceling native sharing does not force a download.
 
@@ -115,7 +130,9 @@ Edit only `src/config/BrandConfig.ts`, then replace files under `public/branding
 - `logo` and each food `iconSrc` are paths under `public/`. Drop a sponsor SVG or PNG on the same path, or point the field at a new file. Buttons and the stand QR page pick them up. No remote fetch.
 - Social handles are config: `instagram`, `facebook` and `tiktok` are `@foody`; `parent` is `@Agroalimentos_SA`; hashtags are `#FoodyARFarm` and `#ExpoVet2026`. The story hint is the string `storyHint` (`Etiquetá a @foody en tu historia`). The share image prints `@foody` plus the hashtags. The share caption adds a second line with `@Agroalimentos_SA`. These handles came from the owner and should be double-checked on Instagram before the stand opens.
 - Studio credit (`studio`) is the Fabrizzio Ruiz line, site and WhatsApp deep link on the start screen, the results screen and the QR poster.
-- `VITE_PUBLIC_URL` overrides the QR target. The default is the GitHub Pages URL.
+- `VITE_PUBLIC_URL` overrides the QR target and the link in the share caption. The default is `https://fabrizzioruiz.com/lab/foody-ar-game/`.
+- `FOODY_BASE_PATH` overrides where assets are served. Unset, dev and production use `/lab/foody-ar-game/`. Set it to `/` (or leave it empty) when this app is the whole domain. Playwright sets `/` so the existing root-relative browser tests keep working.
+- Brand colors live on `BrandConfig.colors` and the matching CSS variables (`--ink`, `--olive`, `--paper`, `--sage`, `--glow`). The wordmark is `public/branding/foody-logo.png`.
 
 Results sharing uses the Web Share API with the PNG and the caption when the browser allows both. If it rejects the combination, the sheet gets the image alone. **Copiar texto** and the selectable caption are the fallback, plus **Guardar imagen**. Instagram cannot be prefilled by URL; the hint tells the visitor to tag `@foody` in the story.
 
