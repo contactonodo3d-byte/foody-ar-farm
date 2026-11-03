@@ -22,16 +22,18 @@ test('SDK contract: placement, tracking loss, recovery, orientation and exit',as
    run:()=>{if(!state.initialized)throw new Error('WASM initialization required');modules.forEach(m=>m.onStart?.());timer=setInterval(()=>{if(state.rotate){state.rotate=false;modules.forEach(m=>m.onDeviceOrientationChange?.());}modules.forEach(m=>m.onUpdate?.({processCpuResult:{reality:{position:{x:state.x,y:1.6,z:state.z},rotation:{x:0,y:0,z:0,w:1},intrinsics:[1,0,0,0,0,1,0,0,0,0,-1,-1,0,0,-.02,0],trackingStatus:state.normal?'NORMAL':'LIMITED'}}}));},30);},
    stop:()=>{clearInterval(timer);state.stopped++;},
    GlTextureRenderer:{pipelineModule:()=>({name:'test-video'})},XrConfig:{device:()=>({MOBILE:'mobile'}),camera:()=>({BACK:'back'})},
-   XrController:{configure:(config:{scale:string})=>{if(config.scale!=='responsive')throw new Error('Unverified metric scale');},pipelineModule:()=>({name:'test-slam'}),updateCameraProjectionMatrix:()=>{},hitTest:()=>[{type:'FEATURE_POINT',position:{x:0,y:0,z:0},rotation:{x:0,y:0,z:0,w:1},distance:2}]},
+   XrController:{configure:(config:{scale:string})=>{if(config.scale!=='absolute')throw new Error('World scale must be metric meters');},pipelineModule:()=>({name:'test-slam'}),updateCameraProjectionMatrix:()=>{},hitTest:()=>[{type:'ESTIMATED_SURFACE',position:{x:0,y:0,z:0},rotation:{x:0,y:0,z:0,w:1},distance:2}]},
   };
   Object.defineProperty(window,'XR8',{value:runtime});
  });
- await page.goto('/');await page.getByRole('button',{name:'Probar AR sin marcador',exact:true}).click();
+ await page.goto('/');await page.getByRole('button',{name:'Activar cámara',exact:true}).click();
  await expect(page.getByText('AR sin marcador',{exact:true})).toBeVisible();
- await expect(page.getByRole('button',{name:'¡A jugar! · 60 segundos'})).toBeHidden();
- await page.screenshot({path:'test-results/world-placement-contract.png',fullPage:true});
- await page.getByRole('button',{name:'Colocar granja aquí'}).click();
- await expect(page.getByRole('button',{name:'Colocar granja aquí'})).toHaveCount(0);
+ await expect(page.locator('video')).toBeHidden();
+ const place=page.getByRole('button',{name:'Colocar granja aquí'});
+ await expect.poll(async()=>(await place.count())===0||await place.isEnabled()).toBe(true);
+ if(await place.count())await place.click();
+ await expect(place).toHaveCount(0);
+ await expect(page.locator('.area')).toHaveText('Granja anclada · 2 × 2 m');
  await expect(page.locator('.ar-tools')).toBeVisible();
  await expect(page.getByRole('slider')).toHaveCount(0);
  await page.getByRole('button',{name:'Ajustar',exact:true}).click();

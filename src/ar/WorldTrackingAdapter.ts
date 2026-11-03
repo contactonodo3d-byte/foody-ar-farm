@@ -1,5 +1,14 @@
+import { FarmConfig } from '../config/BrandConfig';
 import type {ExperienceAdapter} from './ExperienceAdapter';
 import type {WorldFrame,WorldPoint} from './XR8Types';
+
+/** The play square is 3 game units wide. Absolute SLAM units are meters, so this scale makes that square 2 m per side. */
+export const TERRAIN_SIDE_METERS = 2;
+export const WORLD_FARM_SCALE = TERRAIN_SIDE_METERS / (FarmConfig.halfSize * 2);
+
+function placedFarm() {
+ return { scale: WORLD_FARM_SCALE, x: 0, y: 0, z: 0, yaw: 0 };
+}
 export function validWorldFrame(frame:WorldFrame|undefined):frame is WorldFrame {
  if(!frame||frame.trackingStatus!=='NORMAL'||frame.intrinsics?.length!==16)return false;
  const {position:p,rotation:q}=frame;
@@ -9,17 +18,17 @@ export function validWorldFrame(frame:WorldFrame|undefined):frame is WorldFrame 
 }
 export class WorldTrackingAdapter implements ExperienceAdapter {
  readonly mode='world';
- // Responsive SLAM units are deliberately not treated as calibrated physical meters.
+ // Boundary pause stays off. The rendered scale is metric; the game still does not pause on a virtual OUTSIDE.
  readonly reliablePhysicalTracking=false;
  origin:WorldPoint|null=null;frame:WorldFrame|null=null;
- placement={scale:1,x:0,y:0,z:0,yaw:0};
+ placement=placedFarm();
  setPlacement(patch:Partial<typeof this.placement>){
   for(const key of ['scale','x','y','z','yaw'] as const){
    const value=patch[key];if(value===undefined||!Number.isFinite(value))continue;
    this.placement[key]=Math.max(key==='scale'?.25:key==='yaw'?-180:-3,Math.min(key==='scale'?3:key==='yaw'?180:3,value));
   }
  }
- resetTransform(){this.placement={scale:1,x:0,y:0,z:0,yaw:0};}
+ resetTransform(){this.placement=placedFarm();}
  get farmOrigin(){return this.origin?{x:this.origin.x+this.placement.x,y:this.origin.y+this.placement.y,z:this.origin.z+this.placement.z}:null;}
  tracking=false;private stableFrames=0;private lastFrame=-Infinity;
  update(frame:WorldFrame|undefined,now:number){

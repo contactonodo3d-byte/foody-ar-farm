@@ -109,6 +109,8 @@ header{position:sticky;top:0;z-index:6;gap:8px;flex-wrap:wrap;background:color-m
 .phase-ready .intro{padding-top:12px}
 .phase-ready:not(.spatial-ui) .farm{height:28svh;min-height:190px;max-height:260px}
 .spatial-ui .farm{max-height:none!important}
+.spatial-ui .world-feed{position:fixed;inset:0;z-index:0;width:100%;height:100%;border-radius:0;pointer-events:none}
+.spatial-ui .farm canvas{width:100%;height:100%}
 .phase-ready .play-panel{margin-top:8px}
 .result-feeds{list-style:none;margin:8px 0 0;padding:0;text-align:left}
 .result-feeds li{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--sage);font-size:14px}

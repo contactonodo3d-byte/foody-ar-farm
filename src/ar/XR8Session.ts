@@ -3,6 +3,13 @@ import {loadXR8} from './XR8Loader';
 import {VirtualAdapter} from './ExperienceAdapter';
 import type {XR8Runtime,WorldHit} from './XR8Types';
 import type {GameEngine} from '../engine/GameEngine';
+
+function cameraFailure(error: unknown) {
+ const name = error instanceof DOMException ? error.name : '';
+ const message = error instanceof Error ? error.message : '';
+ if (name === 'NotAllowedError' || /NotAllowedError|permission denied/i.test(message)) return 'La cámara no tiene permiso. Habilitala en los ajustes del sitio o seguí en modo virtual.';
+ return message || 'No se pudo iniciar AR.';
+}
 export type WorldPhase='idle'|'starting'|'scanning'|'placed'|'error';
 export interface WorldStatus {phase:WorldPhase;message:string;canPlace:boolean}
 export class XR8Session {
@@ -19,7 +26,7 @@ export class XR8Session {
    if(!window.isSecureContext)throw new Error('Para usar AR necesitás HTTPS confiable.');
    const xr=await this.loader();if(generation!==this.generation)return;
    this.runtime=xr;this.canvas=canvas;this.engine.adapter=this.adapter;this.adapter.resetPlacement();
-   xr.XrController.configure({disableWorldTracking:false,scale:'responsive',enableLighting:false,enableWorldPoints:false});
+   xr.XrController.configure({disableWorldTracking:false,scale:'absolute',enableLighting:false,enableWorldPoints:false});
    const current=()=>generation===this.generation&&this.running;
    const module={
     name:'foody-world-tracking',
@@ -40,7 +47,7 @@ export class XR8Session {
    this.poll=setInterval(()=>{if(current()){this.adapter.expire(performance.now());if(!this.adapter.tracking)this.candidate=null;this.publish();}},150);
    this.startup=setTimeout(()=>{if(current())void this.fail('La cámara tardó demasiado en abrir. Volvé a intentar.');},25000);
    await xr.run({canvas,allowedDevices:xr.XrConfig.device().MOBILE,cameraConfig:{direction:xr.XrConfig.camera().BACK},glContextConfig:{alpha:false}});
-  }catch(error){if(generation===this.generation)await this.fail(error instanceof Error?error.message:'No se pudo iniciar AR.');}
+  }catch(error){if(generation===this.generation)await this.fail(cameraFailure(error));}
  }
  private resize(force:boolean){
   if(!this.canvas||!this.runtime)return;
@@ -54,9 +61,10 @@ export class XR8Session {
  }
  private updateCandidate(){
   this.candidate=null;if(!this.adapter.tracking||this.adapter.origin||!this.runtime)return;
-  // A user-selected estimated point is not advertised as semantic floor detection.
-  try{this.candidate=this.runtime.XrController.hitTest(.5,.55,['FEATURE_POINT']).find(hit=>
+  try{this.candidate=this.runtime.XrController.hitTest(.5,.55,['FEATURE_POINT','ESTIMATED_SURFACE','DETECTED_SURFACE']).find(hit=>
    ['FEATURE_POINT','DETECTED_SURFACE','ESTIMATED_SURFACE'].includes(hit.type)&&Number.isFinite(hit.distance)&&hit.distance>0&&hit.distance<20&&[hit.position.x,hit.position.y,hit.position.z].every(Number.isFinite))??null;}catch{/* Retry with a future tracked camera frame. */}
+  // Anchor as soon as the floor estimate exists so opening the camera places the farm.
+  if(this.candidate)this.place();
  }
  reposition(){this.adapter.resetPlacement();this.adapter.resetTransform();this.candidate=null;this.publish();}
  place(){if(!this.candidate||!this.adapter.place(this.candidate.position))return false;this.candidate=null;this.publish();return true;}
