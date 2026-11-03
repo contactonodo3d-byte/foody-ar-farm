@@ -15,20 +15,32 @@ export interface FoodProduct {
 
 /**
  * One file for the stand. Swap colors, copy, logo and feed art here.
+ * `logo` is the only wordmark (public/branding/foody-logo.png). `colors`
+ * are copied onto CSS variables by applyBrandTheme.
  * Handles were confirmed by the owner for Expo Vet 2026 — double-check
  * @foody and @Agroalimentos_SA on Instagram before the stand opens.
  */
 export const BrandConfig = {
   name: 'Foody',
   title: 'Tu pequeña granja',
-  accent: '#ec5938',
-  logo: 'branding/foody-mark.svg',
+  accent: '#5c6c40',
+  logo: 'branding/foody-logo.png',
   colors: {
-    ink: '#274e43',
-    paper: '#fffdf2',
-    sky: '#dff3ff',
-    field: '#b7d878',
-    accent: '#ec5938',
+    ink: '#24301a',
+    olive: '#5c6c40',
+    oliveDeep: '#3e4c2c',
+    paper: '#fbf5dc',
+    sage: '#eeeac6',
+    glow: '#e8c868',
+    sky: '#f7f1df',
+    field: '#c5d37a',
+    muted: '#5d6b48',
+    danger: '#8c3d24',
+    dangerBg: '#f6d7c8',
+    warningBg: '#f3e3a4',
+    black: '#000000',
+    white: '#ffffff',
+    accent: '#5c6c40',
   },
   foods: [
     { id: 'grain', name: 'Maíz', animalLabel: 'Gallinas', species: 'chicken', color: '#f4bd47', accent: '#e07a2f', icon: '🌽', iconSrc: 'branding/feed-maiz.svg', bagLabel: 'Maíz' },
@@ -54,7 +66,13 @@ export const BrandConfig = {
   },
 };
 
-export const PUBLIC_GAME_URL_DEFAULT = 'https://contactonodo3d-byte.github.io/foody-ar-farm/';
+export const PUBLIC_GAME_URL_DEFAULT = 'https://fabrizzioruiz.com/lab/foody-ar-game/';
+
+/** Copies brand tokens onto :root so CSS can use var(--ink) and friends. */
+export function applyBrandTheme(target: HTMLElement | null = typeof document === 'undefined' ? null : document.documentElement) {
+  if (!target) return;
+  for (const [key, value] of Object.entries(BrandConfig.colors)) target.style.setProperty(`--${key}`, value);
+}
 
 /** Public play URL for the stand QR. Override at build time with VITE_PUBLIC_URL. */
 export function gamePublicUrl() {
@@ -73,6 +91,7 @@ export function shareCaption(result: { points: number; fed: number }) {
   const meals = `${result.fed} ${result.fed === 1 ? 'comida' : 'comidas'}`;
   return [
     `¡Jugué ${BrandConfig.name} AR Farm en ${social.event}! ${result.points} puntos y ${meals}.`,
+    gamePublicUrl(),
     `Etiquetá a ${social.instagram}`,
     social.parent,
     social.hashtags.join(' '),

@@ -29,10 +29,11 @@ jobs:
         run: npm run build
         env:
           FOODY_BASE_PATH: /foody-ar-farm/
-          VITE_PUBLIC_URL: https://contactonodo3d-byte.github.io/foody-ar-farm/
+          VITE_PUBLIC_URL: https://fabrizzioruiz.com/lab/foody-ar-game/
       - name: Check the subpath build
         run: |
           grep -q '/foody-ar-farm/assets/' dist/index.html
+          grep -q 'https://fabrizzioruiz.com/lab/foody-ar-game/' dist/index.html
           test -f dist/marker.html
           test -f dist/models/chicken.glb
           test -f dist/models/chick.glb

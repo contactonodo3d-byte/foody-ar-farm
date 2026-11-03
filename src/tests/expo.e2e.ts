@@ -29,6 +29,6 @@ test('results card names Foody and the stand QR uses the public URL', async ({ p
  await expect(page.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', /wa\.me\/595972780989/);
  await page.goto('/?stand=1');
  await expect(page.getByRole('heading', { name: 'Foody AR Farm' })).toBeVisible();
- await expect(page.getByText('https://contactonodo3d-byte.github.io/foody-ar-farm/')).toBeVisible();
+ await expect(page.getByText('https://fabrizzioruiz.com/lab/foody-ar-game/')).toBeVisible();
  await expect(page.getByRole('img', { name: /Código QR/ })).toBeVisible();
 });

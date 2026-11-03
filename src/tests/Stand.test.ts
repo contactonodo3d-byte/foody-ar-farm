@@ -10,7 +10,8 @@ describe('stand copy', () => {
   expect(caption).toContain('@Agroalimentos_SA');
   expect(caption).toContain('#FoodyARFarm');
   expect(caption).toContain('#ExpoVet2026');
-  expect(PUBLIC_GAME_URL_DEFAULT).toBe('https://contactonodo3d-byte.github.io/foody-ar-farm/');
+  expect(caption).toContain('https://fabrizzioruiz.com/lab/foody-ar-game/');
+  expect(PUBLIC_GAME_URL_DEFAULT).toBe('https://fabrizzioruiz.com/lab/foody-ar-game/');
  });
  it('keeps only today on the local leaderboard', () => {
   const memory = new Map<string, string>();

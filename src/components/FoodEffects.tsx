@@ -23,7 +23,7 @@ function labelTexture(name: string, color: string) {
  ctx.fillStyle = '#fffdf2'; ctx.fillRect(0, 0, 256, 128);
  ctx.fillStyle = color; ctx.fillRect(0, 0, 256, 36);
  ctx.fillStyle = '#fffdf2'; ctx.font = '700 22px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('FOODY', 128, 25);
- ctx.fillStyle = '#274e43'; ctx.font = '800 40px sans-serif'; ctx.fillText(name, 128, 92);
+ ctx.fillStyle = BrandConfig.colors.ink; ctx.font = '800 40px sans-serif'; ctx.fillText(name, 128, 92);
  const texture = new CanvasTexture(canvas);
  texture.colorSpace = SRGBColorSpace;
  labels.set(key, texture);
@@ -155,9 +155,9 @@ export function FoodEffects({ engine, reduced }: { engine: GameEngine; reduced: 
   <group ref={flights}>{Array.from({ length: 6 }, (_, index) => <group key={index} visible={false}><FeedChoices/></group>)}</group>
   <group ref={aim} visible={false}>
    <FeedChoices/>
-   <mesh name="Charge" position={[0, -.55, 0]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><ringGeometry args={[.12, .18, 28]}/><meshBasicMaterial color="#ec5938" transparent opacity={.95} side={THREE.DoubleSide}/></mesh>
+   <mesh name="Charge" position={[0, -.55, 0]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => {}}><ringGeometry args={[.12, .18, 28]}/><meshBasicMaterial color={BrandConfig.colors.olive} transparent opacity={.95} side={THREE.DoubleSide}/></mesh>
   </group>
-  <instancedMesh ref={dots} args={[crumbGeometry, undefined, 28]} raycast={() => {}}><meshBasicMaterial color="#ec5938"/></instancedMesh>
+  <instancedMesh ref={dots} args={[crumbGeometry, undefined, 28]} raycast={() => {}}><meshBasicMaterial color={BrandConfig.colors.olive}/></instancedMesh>
   <instancedMesh ref={crumbs} args={[crumbGeometry, undefined, 24]} raycast={() => {}}><meshBasicMaterial color="#f4bd47"/></instancedMesh>
   <group ref={hearts}>{Array.from({ length: 12 }, (_, index) => <mesh key={index} geometry={heartGeometry} visible={false} raycast={() => {}}><meshBasicMaterial color="#ee6e77" transparent side={THREE.DoubleSide} depthWrite={false}/></mesh>)}</group>
  </>;

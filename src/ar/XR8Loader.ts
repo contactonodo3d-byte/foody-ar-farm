@@ -6,7 +6,7 @@ export async function inspectXR8Installation():Promise<XR8Installation>{
   const response=await fetch(import.meta.env.BASE_URL+'vendor/xr8/manifest.json',{cache:'no-store'});
   if(response.ok&&response.headers.get('content-type')?.includes('application/json')){
    const data=await response.json() as {enabled?:boolean;licenseAccepted?:boolean;script?:string};
-   if(data.enabled===true&&data.licenseAccepted===true&&(data.script==='/vendor/xr8/xr.js'||data.script===scriptPath)){
+   if(data.enabled===true&&data.licenseAccepted===true&&typeof data.script==='string'&&data.script.endsWith('vendor/xr8/xr.js')){
     const script=await fetch(scriptPath,{method:'HEAD',cache:'no-store'});
     if(script.ok&&/javascript/.test(script.headers.get('content-type')??''))return {installed:true,script:scriptPath,reason:''};
    }
