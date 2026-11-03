@@ -22,7 +22,7 @@ export interface XR8Runtime {
  GlTextureRenderer:{pipelineModule():CameraPipelineModule};
  XrConfig:{device():{MOBILE:string};camera():{BACK:string}};
  XrController:{
-  configure(options:{disableWorldTracking:boolean;scale:'responsive';enableLighting:boolean;enableWorldPoints:boolean}):void;
+  configure(options:{disableWorldTracking:boolean;scale:'absolute'|'responsive';enableLighting:boolean;enableWorldPoints:boolean}):void;
   pipelineModule():CameraPipelineModule;
   hitTest(x:number,y:number,includedTypes?:string[]):WorldHit[];
   updateCameraProjectionMatrix(options:{cam:{pixelRectWidth:number;pixelRectHeight:number;nearClipPlane:number;farClipPlane:number};origin?:WorldPoint;facing?:WorldRotation}):void;
